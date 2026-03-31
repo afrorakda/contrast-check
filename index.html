@@ -41,24 +41,26 @@
         h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; letter-spacing: -1px; }
         .subtitle { font-size: 0.85rem; color: #666; font-weight: 500; margin-bottom: 30px; }
 
-        /* Preview Area - Double Size */
+        /* Preview Area - 2 Stages */
         .preview-box {
             width: 100%;
-            padding: 30px 20px;
+            padding: 35px 25px;
             border-radius: var(--radius);
             border: 2px solid var(--accent);
             margin-bottom: 25px;
             transition: all 0.2s;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 15px;
             text-align: left;
             box-sizing: border-box;
-            min-height: 140px;
+            min-height: 160px;
             justify-content: center;
+            background-color: #ffffff; /* Initial */
+            color: #333333; /* Initial */
         }
-        .preview-headline { font-size: 1.8rem; font-weight: 800; line-height: 1.1; }
-        .preview-body { font-size: 0.95rem; font-weight: 500; line-height: 1.5; }
+        .preview-headline { font-size: 2.0rem; font-weight: 900; line-height: 1.1; }
+        .preview-body { font-size: 1.0rem; font-weight: 500; line-height: 1.5; }
 
         /* Input Controls */
         .input-group {
@@ -74,7 +76,7 @@
         }
 
         label {
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 800;
             margin-left: 5px;
             margin-bottom: 5px;
@@ -85,11 +87,12 @@
 
         .input-field {
             width: 100%;
-            padding: 15px;
+            padding: 18px;
+            padding-right: 60px;
             border: 2px solid var(--accent);
             border-radius: var(--radius);
             background: var(--input-bg);
-            font-size: 1rem;
+            font-size: 1.1rem;
             font-weight: 700;
             color: var(--main) !important;
             box-sizing: border-box;
@@ -98,8 +101,26 @@
             -webkit-text-fill-color: var(--main) !important;
             opacity: 1 !important;
         }
+        .input-field::placeholder { color: #bbb; -webkit-text-fill-color: #bbb; opacity: 1 !important; }
 
-        /* Results Area */
+        /* Clear Button (clr) */
+        .clear-btn {
+            position: absolute;
+            right: 15px;
+            bottom: 12px;
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 0.85rem;
+            font-weight: 800;
+            cursor: pointer;
+            padding: 5px 8px;
+            display: none;
+            z-index: 5;
+        }
+        .clear-btn.active { display: block; }
+
+        /* Results */
         .results {
             display: grid;
             grid-template-columns: 1.2fr 1fr;
@@ -112,10 +133,6 @@
             padding: 15px;
             border-radius: var(--radius);
             text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
         }
 
         .ratio-value { font-size: 1.6rem; font-weight: 900; display: block; margin-top: 2px; }
@@ -172,11 +189,13 @@
     <div class="input-group">
         <div class="input-wrapper">
             <label>Background Color</label>
-            <input type="text" class="input-field" id="bgColor" value="#ffffff" placeholder="#FFFFFF" oninput="updateContrast()">
+            <input type="text" class="input-field" id="bgColor" placeholder="e.g. #ffffff, white" oninput="updateContrast()">
+            <button class="clear-btn" id="clrBg" onclick="clearInput('bgColor')">clr</button>
         </div>
         <div class="input-wrapper">
             <label>Text Color</label>
-            <input type="text" class="input-field" id="textColor" value="#333333" placeholder="#333333" oninput="updateContrast()">
+            <input type="text" class="input-field" id="textColor" placeholder="e.g. #333333, black" oninput="updateContrast()">
+            <button class="clear-btn" id="clrText" onclick="clearInput('textColor')">clr</button>
         </div>
     </div>
 
@@ -229,25 +248,29 @@
     }
 
     function updateContrast() {
-        const bg = document.getElementById('bgColor').value;
-        const text = document.getElementById('textColor').value;
+        const bgVal = document.getElementById('bgColor').value || "#ffffff";
+        const textVal = document.getElementById('textColor').value || "#333333";
+        
+        // Show/Hide clr buttons
+        document.getElementById('clrBg').classList.toggle('active', document.getElementById('bgColor').value !== '');
+        document.getElementById('clrText').classList.toggle('active', document.getElementById('textColor').value !== '');
+
         const preview = document.getElementById('preview');
         const ratioDisplay = document.getElementById('ratio');
         const aaStatus = document.getElementById('aaStatus');
 
         try {
-            preview.style.backgroundColor = bg;
-            preview.style.color = text;
+            preview.style.backgroundColor = bgVal;
+            preview.style.color = textVal;
 
-            const l1 = getLuminance(bg);
-            const l2 = getLuminance(text);
+            const l1 = getLuminance(bgVal);
+            const l2 = getLuminance(textVal);
             
             const ratio = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
             const fixedRatio = ratio.toFixed(2);
             
-            ratioDisplay.innerText = fixedRatio;
+            ratioDisplay.innerText = isFinite(fixedRatio) ? fixedRatio : "1.00";
 
-            // WCAG AA standard for normal text is 4.5:1
             if (ratio >= 4.5) {
                 aaStatus.innerText = "PASS";
                 aaStatus.className = "status-badge pass";
@@ -255,9 +278,13 @@
                 aaStatus.innerText = "FAIL";
                 aaStatus.className = "status-badge fail";
             }
-        } catch (e) {
-            // Silence errors on partial hex codes
-        }
+        } catch (e) {}
+    }
+
+    function clearInput(id) {
+        document.getElementById(id).value = '';
+        updateContrast();
+        document.getElementById(id).focus();
     }
 
     function showModal() { document.getElementById('modal').style.display = 'flex'; }
