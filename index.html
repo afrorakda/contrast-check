@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Contrast Check</title>
+    
+    <link rel="icon" href="image_51.png">
+    <link rel="apple-touch-icon" href="image_51.png">
+
+    <style>
+        :root {
+            --main: #333;
+            --bg: #fff;
+            --accent: #eee;
+            --input-bg: #fafafa;
+            --radius: 15px;
+            --success: #2ecc71;
+            --fail: #e74c3c;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 420px;
+            padding: 40px 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; letter-spacing: -1px; }
+        .subtitle { font-size: 0.85rem; color: #666; font-weight: 500; margin-bottom: 30px; }
+
+        /* Preview Area */
+        .preview-box {
+            width: 100%;
+            padding: 40px 20px;
+            border-radius: var(--radius);
+            border: 2px solid var(--accent);
+            margin-bottom: 25px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 120px;
+            box-sizing: border-box;
+        }
+
+        /* Input Controls */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            text-align: left;
+        }
+
+        label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            margin-left: 5px;
+            margin-bottom: 5px;
+            display: block;
+            color: #999;
+            text-transform: uppercase;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid var(--accent);
+            border-radius: var(--radius);
+            background: var(--input-bg);
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--main) !important;
+            box-sizing: border-box;
+            outline: none;
+            -webkit-appearance: none;
+            -webkit-text-fill-color: var(--main) !important;
+            opacity: 1 !important;
+        }
+
+        /* Results Table */
+        .results {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .result-card {
+            background: var(--input-bg);
+            padding: 15px;
+            border-radius: var(--radius);
+            text-align: center;
+        }
+
+        .ratio-value { font-size: 1.5rem; font-weight: 900; display: block; margin-bottom: 5px; }
+        .ratio-label { font-size: 0.7rem; font-weight: 700; color: #999; }
+
+        .status-badge {
+            font-size: 0.8rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 8px;
+            color: #fff;
+            margin-top: 5px;
+            display: inline-block;
+        }
+        .pass { background-color: var(--success); }
+        .fail { background-color: var(--fail); }
+
+        /* Footer & Buttons */
+        footer { margin-top: 50px; font-size: 11px; color: #aaa; line-height: 1.8; }
+        .footer-btns { margin-top: 30px; }
+        .kofi-btn {
+            display: inline-block; background: var(--main); color: #fff;
+            padding: 12px 25px; border-radius: var(--radius);
+            text-decoration: none; font-weight: bold; font-size: 14px; margin-bottom: 12px;
+        }
+        .home-btn {
+            display: block; width: 60%; margin: 0 auto; background: var(--accent);
+            color: var(--main); border: none; padding: 10px;
+            border-radius: var(--radius); font-weight: 700; font-size: 13px; cursor: pointer;
+        }
+
+        #modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 100;
+        }
+        .modal-content {
+            background: #fff; width: 85%; max-width: 320px; padding: 30px;
+            border-radius: var(--radius); text-align: left; position: relative;
+        }
+        .close-x { position: absolute; top: 15px; right: 20px; font-size: 20px; color: #ccc; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Contrast Check</h1>
+    <p class="subtitle">WCAG 2.1 Accessibility Validator</p>
+
+    <div class="preview-box" id="preview">
+        Sample Text
+    </div>
+
+    <div class="input-group">
+        <div class="input-wrapper">
+            <label>Background Color</label>
+            <input type="text" class="input-field" id="bgColor" value="#ffffff" placeholder="#FFFFFF" oninput="updateContrast()">
+        </div>
+        <div class="input-wrapper">
+            <label>Text Color</label>
+            <input type="text" class="input-field" id="textColor" value="#333333" placeholder="#333333" oninput="updateContrast()">
+        </div>
+    </div>
+
+    <div class="results">
+        <div class="result-card">
+            <span class="ratio-label">CONTRAST RATIO</span>
+            <span class="ratio-value" id="ratio">21.00</span>
+        </div>
+        <div class="result-card">
+            <span class="ratio-label">WCAG AA (4.5:1)</span>
+            <div id="aaStatus" class="status-badge pass">PASS</div>
+        </div>
+    </div>
+
+    <div class="footer-btns">
+        <a href="https://ko-fi.com/afrorakda" target="_blank" class="kofi-btn">☕️buy me a coffee</a>
+        <button class="home-btn" onclick="showModal()">Add to Home Screen</button>
+    </div>
+
+    <footer>
+        <div>No login / No tracking / No ads / Browser only</div>
+        <div>Privacy Policy / afrorakda © 2026</div>
+    </footer>
+</div>
+
+<div id="modal" onclick="hideModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-x" onclick="hideModal()">×</span>
+        <h3>📱 Install</h3>
+        <p>Add to your home screen.</p>
+        <p>🍏 <strong>iPhone (Safari):</strong><br>Tap Share, then Add to Home Screen.</p>
+        <p>🤖 <strong>Android (Chrome):</strong><br>Tap Menu (⋮), then Add to Home Screen.</p>
+    </div>
+</div>
+
+<script>
+    function getLuminance(color) {
+        const temp = document.createElement("div");
+        temp.style.color = color;
+        document.body.appendChild(temp);
+        const style = window.getComputedStyle(temp).color;
+        document.body.removeChild(temp);
+
+        const rgb = style.match(/\d+/g).map(Number);
+        const [r, g, b] = rgb.map(v => {
+            v /= 255;
+            return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+        });
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    }
+
+    function updateContrast() {
+        const bg = document.getElementById('bgColor').value;
+        const text = document.getElementById('textColor').value;
+        const preview = document.getElementById('preview');
+        const ratioDisplay = document.getElementById('ratio');
+        const aaStatus = document.getElementById('aaStatus');
+
+        try {
+            preview.style.backgroundColor = bg;
+            preview.style.color = text;
+
+            const l1 = getLuminance(bg);
+            const l2 = getLuminance(text);
+            
+            const ratio = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+            const fixedRatio = ratio.toFixed(2);
+            
+            ratioDisplay.innerText = fixedRatio;
+
+            if (ratio >= 4.5) {
+                aaStatus.innerText = "PASS";
+                aaStatus.className = "status-badge pass";
+            } else {
+                aaStatus.innerText = "FAIL";
+                aaStatus.className = "status-badge fail";
+            }
+        } catch (e) {
+            // Invalid color input
+        }
+    }
+
+    function showModal() { document.getElementById('modal').style.display = 'flex'; }
+    function hideModal() { document.getElementById('modal').style.display = 'none'; }
+
+    // Initial run
+    updateContrast();
+</script>
+
+</body>
+</html>
