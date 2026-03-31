@@ -41,22 +41,24 @@
         h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; letter-spacing: -1px; }
         .subtitle { font-size: 0.85rem; color: #666; font-weight: 500; margin-bottom: 30px; }
 
-        /* Preview Area */
+        /* Preview Area - Double Size */
         .preview-box {
             width: 100%;
-            padding: 40px 20px;
+            padding: 30px 20px;
             border-radius: var(--radius);
             border: 2px solid var(--accent);
             margin-bottom: 25px;
-            font-size: 1.2rem;
-            font-weight: 700;
             transition: all 0.2s;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 120px;
+            flex-direction: column;
+            gap: 12px;
+            text-align: left;
             box-sizing: border-box;
+            min-height: 140px;
+            justify-content: center;
         }
+        .preview-headline { font-size: 1.8rem; font-weight: 800; line-height: 1.1; }
+        .preview-body { font-size: 0.95rem; font-weight: 500; line-height: 1.5; }
 
         /* Input Controls */
         .input-group {
@@ -72,7 +74,7 @@
         }
 
         label {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 800;
             margin-left: 5px;
             margin-bottom: 5px;
@@ -97,10 +99,10 @@
             opacity: 1 !important;
         }
 
-        /* Results Table */
+        /* Results Area */
         .results {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1.2fr 1fr;
             gap: 10px;
             margin-top: 20px;
         }
@@ -110,18 +112,22 @@
             padding: 15px;
             border-radius: var(--radius);
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
-        .ratio-value { font-size: 1.5rem; font-weight: 900; display: block; margin-bottom: 5px; }
-        .ratio-label { font-size: 0.7rem; font-weight: 700; color: #999; }
+        .ratio-value { font-size: 1.6rem; font-weight: 900; display: block; margin-top: 2px; }
+        .ratio-label { font-size: 0.65rem; font-weight: 700; color: #999; }
 
         .status-badge {
             font-size: 0.8rem;
             font-weight: 800;
-            padding: 4px 10px;
+            padding: 5px 12px;
             border-radius: 8px;
             color: #fff;
-            margin-top: 5px;
+            margin-top: 8px;
             display: inline-block;
         }
         .pass { background-color: var(--success); }
@@ -159,7 +165,8 @@
     <p class="subtitle">WCAG 2.1 Accessibility Validator</p>
 
     <div class="preview-box" id="preview">
-        Sample Text
+        <div class="preview-headline">Headline Text</div>
+        <div class="preview-body">This is a sample of body text to check readability at a smaller size.</div>
     </div>
 
     <div class="input-group">
@@ -240,6 +247,7 @@
             
             ratioDisplay.innerText = fixedRatio;
 
+            // WCAG AA standard for normal text is 4.5:1
             if (ratio >= 4.5) {
                 aaStatus.innerText = "PASS";
                 aaStatus.className = "status-badge pass";
@@ -248,14 +256,13 @@
                 aaStatus.className = "status-badge fail";
             }
         } catch (e) {
-            // Invalid color input
+            // Silence errors on partial hex codes
         }
     }
 
     function showModal() { document.getElementById('modal').style.display = 'flex'; }
     function hideModal() { document.getElementById('modal').style.display = 'none'; }
 
-    // Initial run
     updateContrast();
 </script>
 
